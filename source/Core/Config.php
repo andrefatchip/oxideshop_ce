@@ -340,10 +340,11 @@ class Config extends \OxidEsales\Eshop\Core\Base
      */
     public function setConfigParam($name, $value)
     {
-        if (isset($this->$name)) {
-            $this->$name = $value;
-        } else {
+        if (isset($this->_aConfigParams[$name])
+            || !isset($this->$name)) {
             $this->_aConfigParams[$name] = $value;
+        } elseif (isset($this->$name)) {
+            $this->$name = $value;
         }
     }
 
