@@ -6,15 +6,13 @@
 
 namespace OxidEsales\EshopCommunity\Application\Component;
 
-use oxDb;
+use OxidEsales\Eshop\Application\Model\Address;
 use OxidEsales\Eshop\Core\Registry;
 use OxidEsales\Eshop\Core\Form\FormFields;
 use OxidEsales\Eshop\Core\Form\FormFieldsTrimmer;
 use OxidEsales\Eshop\Core\Form\UpdatableFieldsConstructor;
-use oxRegistry;
-use oxUser;
+use OxidEsales\Eshop\Core\Request;
 use Exception;
-use oxField;
 use OxidEsales\Eshop\Core\Contract\AbstractUpdatableFields;
 use OxidEsales\Eshop\Application\Model\User\UserUpdatableFields;
 use OxidEsales\Eshop\Application\Model\User\UserShippingAddressUpdatableFields;
@@ -566,6 +564,34 @@ class UserComponent extends \OxidEsales\Eshop\Core\Controller\BaseController
             // problems with registration ...
             $this->logout();
         }
+    }
+
+    /**
+     * Deletes user shipping address.
+     *
+     * @throws \OxidEsales\Eshop\Core\Exception\SystemComponentException
+     */
+    public function deleteShippingAddress()
+    {
+        $request = oxNew(Request::class);
+        $addressId = $request->getRequestParameter('oxaddressid');
+
+        $address = oxNew(Address::class);
+        $address->load($addressId);
+        if ($this->canUserDeleteShippingAddress($address) && $this->getSession()->checkSessionChallenge()) {
+            $address->delete($addressId);
+        }
+    }
+
+    private function canUserDeleteShippingAddress($address)
+    {
+        $canDelete = false;
+        $user = $this->getUser();
+        if ($address->oxaddress__oxuserid->value === $user->getId()) {
+            $canDelete = true;
+        }
+
+        return $canDelete;
     }
 
     /**
